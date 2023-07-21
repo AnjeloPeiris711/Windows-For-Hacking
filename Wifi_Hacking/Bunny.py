@@ -29,6 +29,10 @@ class CheckInterface:
         #     print(self.name)
         #     print(self.interface_name)
 checkin = CheckInterface()
+class SelectInterface:
+        def __init__(self):
+            raise NotImplementedError("Select -i")
+selin = SelectInterface()
 class Commands:
     def __init__(self):
         parser = argparse.ArgumentParser(prog='Bunny', description='Wifi Hacking Tool for Windows')
@@ -63,6 +67,8 @@ class Commands:
                 checkin.compair()
             case args.version:
                 print("0.01")
+            case args.interface:
+                selin
             case _:
                 bunny = Bunny()
 if __name__ == "__main__":
