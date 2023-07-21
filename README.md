@@ -1,4 +1,4 @@
-# This is Development Branch
+
 ## How To Use Windows As A Hackers Operating System
 
 ## Can we use windows OS as a hacking platform?
