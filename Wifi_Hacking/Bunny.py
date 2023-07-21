@@ -1,5 +1,6 @@
-import argparse
 import os
+import scapy
+import argparse
 
 class Bunny:
     def __init__(self):
@@ -30,9 +31,14 @@ class CheckInterface:
         #     print(self.interface_name)
 checkin = CheckInterface()
 class SelectInterface:
-        def __init__(self):
-            raise NotImplementedError("Select -i")
-selin = SelectInterface()
+    def __init__(self):
+        raise NotImplementedError("Select -i")
+class InablemonitorMood:
+    def __init__(self) -> None:
+        pass
+class Scan:
+    def __init__(self) -> None:
+        pass
 class Commands:
     def __init__(self):
         parser = argparse.ArgumentParser(prog='Bunny', description='Wifi Hacking Tool for Windows')
@@ -68,8 +74,8 @@ class Commands:
             case args.version:
                 print("0.01")
             case args.interface:
-                selin
+                SelectInterface()
             case _:
-                bunny = Bunny()
+                Bunny()
 if __name__ == "__main__":
     commands = Commands()
