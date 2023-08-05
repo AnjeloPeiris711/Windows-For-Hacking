@@ -15,3 +15,7 @@ operable program or batch file.
 In order to resolve the ‘whois’ not recognized, we need to manually install a Whois program.
 
 Let’s do it. After installation and adding path, It will work on any version of Windows 
+
+### Please follow these steps to use the "Whois" tool 😯
+
+Step 1: [Download Whois Program](https://learn.microsoft.com/en-us/sysinternals/downloads/whois) from Microsoft’s site.
