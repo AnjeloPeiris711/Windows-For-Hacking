@@ -1,4 +1,4 @@
-#### see my post https://www.linkedin.com/posts/anjelo-peiris-522069230_windows-for-hackers-can-we-use-windows-activity-7089074389916258304-gY2i?utm_source=share&utm_medium=member_desktop
+#### see my post in LinkedIn [https://www.linkedin.com/posts/anjelo-peiris-522069230_windows-for-hackers-can-we-use-windows-activity-7089074389916258304-gY2i?utm_source=share&utm_medium=member_desktop]
 ## How To Use Windows As A Hackers Operating System
 
 ## Can we use windows OS as a hacking platform?
