@@ -8,7 +8,7 @@ The sudo command ```provides an efficient way to grant users the special rights 
 
 There is no sudo command in Windows. The nearest equivalent is ```run as administrator```You can do this using the runas command with an administrator trust-level, or by right-clicking the program in the UI and choosing "run as administrator."
 
-Use bat file
+Use bat file to add Sudo Command for Windows
 
 ```
 @echo off
