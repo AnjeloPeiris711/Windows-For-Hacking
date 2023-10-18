@@ -9,6 +9,7 @@ edition = "2021"
 clap = { version = "4.4.4", features = ["cargo"] }
 owo-colors = "3.5.0"
 sysinfo = "0.29.10"
-winapi = { version = "0.3", features = ["iphlpapi","netioapi"] }
+winapi = { version = "0.3", features = ["iphlpapi","netioapi","wlanapi","minwindef","guiddef","winerror","ifdef"] }
 ipconfig = "0.3.2"
 pnet = "0.34.0"
+prettytable-rs = "0.10.0" 
