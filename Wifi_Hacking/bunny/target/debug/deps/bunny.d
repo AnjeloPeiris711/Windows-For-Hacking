@@ -1,8 +1,9 @@
-D:\youtube\Windows-For-Hacking\Wifi_Hacking\bunny\target\debug\deps\bunny.exe: src\main.rs
+D:\youtube\Windows-For-Hacking\Wifi_Hacking\bunny\target\debug\deps\bunny.exe: src\main.rs src\cracking.rs
 
-D:\youtube\Windows-For-Hacking\Wifi_Hacking\bunny\target\debug\deps\bunny.d: src\main.rs
+D:\youtube\Windows-For-Hacking\Wifi_Hacking\bunny\target\debug\deps\bunny.d: src\main.rs src\cracking.rs
 
 src\main.rs:
+src\cracking.rs:
 
 # env-dep:CARGO_PKG_AUTHORS=
 # env-dep:CARGO_PKG_DESCRIPTION=

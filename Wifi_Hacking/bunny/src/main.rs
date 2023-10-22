@@ -11,11 +11,14 @@ use std::io;
 
 // use pnet::datalink::{self, NetworkInterface,MacAddr};
 use pnet::datalink;
+
+mod crack;
+
 const BUNNY_LOGO: &str = r#"
 
         (\_/)
         (. .) BUNNY!
-        C('')('')
+       C('')('')
 "#;
 
 fn main() {
@@ -28,11 +31,20 @@ fn main() {
         .arg(arg!(
             -m --monmood ... "Enable monitor mood"
         ).action(ArgAction::SetTrue))
+        .arg(arg!(
+            -c --crack ... "crack the password"
+        ).action(ArgAction::SetTrue))
         .subcommand(
             Command::new("-C")
                 .long_about("--chek")
                 .about("Chek")
                 .arg(arg!(-d --debug ... "Identify Network interface").action(ArgAction::SetTrue)),
+        )
+        .subcommand(
+            Command::new("-I")
+                .long_about("--Interface")
+                .about("Select Interface")
+                .arg(arg!(-I --Interface ... "Select Interface").action(ArgAction::SetTrue)),
         )
         .get_matches();
     let mut table = Table::new();
@@ -82,6 +94,10 @@ fn main() {
     if match_result.get_flag("monmood"){
         println!("monmood");
         println!("My number is not {}!", 4.on_red());
+        // support_monitor_mood().unwrap()
+    } 
+    if match_result.get_flag("crack"){
+        crack::process_packets()
         // support_monitor_mood().unwrap()
     } 
     if let Some(match_result) = match_result.subcommand_matches("-C") {
