@@ -4,29 +4,12 @@ use ring::{pbkdf2, hmac};
 use md5::{Md5, Digest};
 use hex;
 use std::num::NonZeroU32;
+
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
-use indicatif::{HumanDuration, MultiProgress, ProgressBar,ProgressStyle};
-use rand::Rng;
-use rand::seq::SliceRandom;
+use indicatif::{ProgressBar,ProgressStyle,MultiProgress};
 
-static PACKAGES: &[&str;3] = &[
-   "Master Key",
-   "Transient Key",
-   "EAPOL HMAC "
-];
-
-static COMMANDS: &[&str] = &[
-    "cmake .",
-    "make",
-    "make clean",
-    "gcc foo.c -o foo",
-    "gcc bar.c -o bar",
-    "./helper.sh rebuild-cache",
-    "make all-clean",
-    "make test",
-];
 
 pub fn process_packets(){
     //Read a file of passwords containing
@@ -190,12 +173,14 @@ fn test_pwds(
 ) {
     // Pre-computed values
     let (a, b) = make_ab(a_nonce, s_nonce, ap_mac, cli_mac);
-
+    let pb = ProgressBar::new(passwordlist.len() as u64);
+    pb.set_style(ProgressStyle::with_template("{wide_msg}")
+        .unwrap());
     // Loop over each password and test each one
     for password in &passwordlist {
         let (mic, _, _) = make_mic(password, ssid, &a, &b, data1, true);
         let v = hex::encode(&mic[..16]);
-        formated_output();
+        pb.set_message(format!("{password}: {v}"));
         if v != targ_mic {
             continue;
         }
@@ -212,48 +197,9 @@ fn test_pwds(
         if v3 != targ_mic3 {
             continue;
         }
-
-        // All of them match
-        // println!("!!!Password Found!!!");
-        // println!("Desired MIC1:\t\t{}", targ_mic);
-        // println!("Computed MIC1:\t\t{}", v);
-        // println!("\nDesired MIC2:\t\t{}", targ_mic2);
-        // println!("Computed MIC2:\t\t{}", v2);
-        // println!("\nDesired MIC3:\t\t{}", targ_mic3);
-        // println!("Computed MIC3:\t\t{}", v3);
-        // println!("Password:\t\t{}", password);
-
+        thread::sleep(Duration::from_millis(12));
+        pb.finish();
+        return;
     }
-}
-fn formated_output(){
-    let spinner_style = ProgressStyle::with_template("       {wide_msg}")
-    .unwrap();
-    let m = MultiProgress::new();
-    let mut rng = rand::thread_rng();
-    let started = Instant::now();
-    let handles: Vec<_> = (0..4u32)
-    .map(|i| {
-        let count = rng.gen_range(30..80);
-        let pb = m.add(ProgressBar::new(count));
-        pb.set_style(spinner_style.clone());
-        pb.set_prefix(format!("[{}/?]", i + 1));
-        thread::spawn(move || {
-            let mut rng = rand::thread_rng();
-            let pkg = PACKAGES.choose(&mut rng).unwrap();
-            for _ in 0..count {
-                let cmd = COMMANDS.choose(&mut rng).unwrap();
-                thread::sleep(Duration::from_millis(rng.gen_range(25..200)));
-                pb.set_message(format!("{pkg}: {cmd}"));
-                pb.inc(1);
-            }
-            pb.finish_with_message("waiting...");
-        })
-    })
-    .collect();
-for h in handles {
-    let _ = h.join();
-}
-m.clear().unwrap();
-
-println!("Done in {}", HumanDuration(started.elapsed()));
+    pb.finish();
 }
