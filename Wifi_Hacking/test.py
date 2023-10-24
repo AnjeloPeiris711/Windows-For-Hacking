@@ -36,7 +36,6 @@ def MakeAB(aNonce, sNonce, apMac, cliMac):
     A = b"Pairwise key expansion"
     B = min(apMac, cliMac) + max(apMac, cliMac) + min(aNonce, sNonce) + max(aNonce, sNonce)
     return (A, B)
- 
 #Compute the 1st message integrity check for a WPA 4-way handshake
 #pwd:       The password to test
 #ssid:      The ssid of the AP
@@ -56,9 +55,7 @@ def MakeMIC(pwd, ssid, A, B, data, wpa = False):
     hmacFunc = md5 if wpa else sha1
     #Create the MICs using HMAC-SHA1 of data and return all computed values
     mics = [hmac.new(ptk[0:16], i, hmacFunc).digest() for i in data]
-    mics_hex = [b2a_hex(mic).decode('ascii') for mic in mics]
-
-    print("generated mic:", mics_hex)
+    print(mics)
     return (mics, ptk, pmk)
 
 #Run a brief test showing the computation of the PTK, PMK, and MICS
@@ -107,9 +104,10 @@ if __name__ == "__main__":
             S.append(l.strip())
     #ssid name
     ssid = "Coherer"
+    print(ssid)
     #ANonce
     aNonce = a2b_hex('3e8e967dacd960324cac5b6aa721235bf57b949771c867989f49d04ed47c6933')
-    #SNonce
+    #sNonce
     sNonce = a2b_hex("cdf405ceb9d889ef3dec42609828fae546b7add7baecbb1a394eac5214b1d386")
     #Authenticator MAC (AP)
     apMac = a2b_hex("000d9382363a")

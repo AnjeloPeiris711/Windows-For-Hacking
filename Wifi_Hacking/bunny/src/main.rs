@@ -6,14 +6,20 @@ use clap::{arg, command, ArgAction, Command};
 use owo_colors::OwoColorize;
 use prettytable::{Table, Row, Cell};
 use prettytable::format;
+
 use std::process::Command as PCommand;
 use std::io;
+
+
+
 
 // use pnet::datalink::{self, NetworkInterface,MacAddr};
 use pnet::datalink;
 
-mod crack;
-
+mod components {
+    pub mod crack;
+}
+use components::crack::process_packets;
 const BUNNY_LOGO: &str = r#"
 
         (\_/)
@@ -27,6 +33,9 @@ fn main() {
         .about(BUNNY_LOGO)
         .arg(arg!(
             -i --interface ... "Identify Network interface"
+        ).action(ArgAction::SetTrue))
+        .arg(arg!(
+            -t --test ... "test"
         ).action(ArgAction::SetTrue))
         .arg(arg!(
             -m --monmood ... "Enable monitor mood"
@@ -97,8 +106,11 @@ fn main() {
         // support_monitor_mood().unwrap()
     } 
     if match_result.get_flag("crack"){
-        crack::process_packets()
+        process_packets();
         // support_monitor_mood().unwrap()
+    } 
+    if match_result.get_flag("test"){
+        println!("test")
     } 
     if let Some(match_result) = match_result.subcommand_matches("-C") {
         // "$ myapp test" was run
