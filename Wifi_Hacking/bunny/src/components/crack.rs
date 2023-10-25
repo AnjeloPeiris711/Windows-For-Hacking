@@ -172,15 +172,32 @@ fn test_pwds(
     targ_mic3: &str,
 ) {
     // Pre-computed values
+    let m = MultiProgress::new();
+    let bar_style = ProgressStyle::with_template("{wide_msg},")
+    .unwrap();
     let (a, b) = make_ab(a_nonce, s_nonce, ap_mac, cli_mac);
-    let pb = ProgressBar::new(passwordlist.len() as u64);
-    pb.set_style(ProgressStyle::with_template("{wide_msg}")
-        .unwrap());
+    // let pb = ProgressBar::new(passwordlist.len() as u64);
+    //create ProgressBar 
+    let progressbar = m.add(ProgressBar::new(passwordlist.len() as u64));
+    progressbar.set_style(ProgressStyle::with_template("[{elapsed_precise}]")
+    .unwrap().progress_chars("=> "));
+    //create Master Key Bar
+    let master_keybar = m.add(ProgressBar::new(passwordlist.len() as u64));
+    master_keybar.set_style(bar_style.clone());
+
+    let transient_keybar = m.add(ProgressBar::new(passwordlist.len() as u64));
+    transient_keybar.set_style(bar_style.clone());
+
+    let eapol_hmacbar = m.add(ProgressBar::new(passwordlist.len() as u64));
+    eapol_hmacbar.set_style(bar_style.clone());
     // Loop over each password and test each one
     for password in &passwordlist {
-        let (mic, _, _) = make_mic(password, ssid, &a, &b, data1, true);
+        let (mic, ptk, pmk) = make_mic(password, ssid, &a, &b, data1, true);
         let v = hex::encode(&mic[..16]);
-        pb.set_message(format!("{password}: {v}"));
+        progressbar.inc(1);
+        master_keybar.set_message(format!("Master Key   : {}",hex::encode(&pmk[..32])));
+        transient_keybar.set_message(format!("Transient Key : {}",hex::encode(&ptk[..64])));
+        eapol_hmacbar.set_message(format!("EAPOL HMAC   : {v}"));
         if v != targ_mic {
             continue;
         }
@@ -198,8 +215,14 @@ fn test_pwds(
             continue;
         }
         thread::sleep(Duration::from_millis(12));
-        pb.finish();
+        progressbar.finish();
+        master_keybar.finish();
+        transient_keybar.finish();
+        eapol_hmacbar.finish();
         return;
     }
-    pb.finish();
+    progressbar.finish();
+    master_keybar.finish();
+    transient_keybar.finish();
+    eapol_hmacbar.finish();
 }
