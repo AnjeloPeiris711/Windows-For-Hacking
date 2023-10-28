@@ -1,20 +1,26 @@
 extern crate ring;
-use ring::{pbkdf2, hmac};
-// static PBKDF2_ALG: pbkdf2::Algorithm = pbkdf2::PBKDF2_HMAC_SHA1;
-use md5::{Md5, Digest};
-use hex;
-use std::num::NonZeroU32;
 
+use hex;
 use std::thread;
+use md5::{Md5, Digest};
 use std::time::Duration;
+use ring::{pbkdf2, hmac};
+use std::num::NonZeroU32;
+use owo_colors::OwoColorize;
 
 use indicatif::{ProgressBar,ProgressStyle,MultiProgress};
+// use crate::components::pcapformatter;
 
+use super::pcapformatter::formater;
 
-pub fn process_packets(){
+pub fn process_packets(
+    wfile_path: &str,
+    pfile_path: &str
+){
     //Read a file of passwords containing
     //passwords separated by a newline
-    let passwordlist: Vec<String> = std::fs::read_to_string("passwd.txt")
+    let pcap_data = formater(pfile_path);
+    let passwordlist: Vec<String> = std::fs::read_to_string(wfile_path)
         .expect("Failed to read file")
         .lines()
         .map(String::from)
@@ -22,32 +28,39 @@ pub fn process_packets(){
     //SSID name
     let ssid = "Coherer";
     // ANonce
-    let a_nonce = hex::decode("3e8e967dacd960324cac5b6aa721235bf57b949771c867989f49d04ed47c6933").expect("Failed to decode ANonce");
+    let a_nonce = hex::decode(pcap_data.a_nonce).expect("Failed to decode ANonce");
     // SNonce
-    let s_nonce = hex::decode("cdf405ceb9d889ef3dec42609828fae546b7add7baecbb1a394eac5214b1d386").expect("Failed to decode SNonce");
+    let s_nonce = hex::decode(pcap_data.s_nonce).expect("Failed to decode SNonce");
     // Authenticator MAC (AP)
-    let ap_mac = hex::decode("000d9382363a").expect("Failed to decode Authenticator MAC");
+    let ap_mac = hex::decode(pcap_data.ap_mac).expect("Failed to decode Authenticator MAC");
     // Station address: MAC of client
-    let cli_mac = hex::decode("000c4182b255").expect("Failed to decode Client MAC");
+    let cli_mac = hex::decode(pcap_data.cli_mac).expect("Failed to decode Client MAC");
     // The first MIC
-    let mic1 = "a462a7029ad5ba30b6af0df391988e45";
+    let mic1 = &pcap_data.mic1;
     // The entire 802.1x frame of the second handshake message with the MIC field set to all zeros
-    let data1 = hex::decode("0203007502010a00100000000000000000cdf405ceb9d889ef3dec42609828fae546b7add7baecbb1a394eac5214b1d386000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001630140100000fac020100000fac040100000fac020000")
+    let data1 = hex::decode(pcap_data.data1)
     .expect("Failed to decode Data1");
     // The second MIC
-    let mic2 = "7d0af6df51e99cde7a187453f0f93537";
+    let mic2 = &pcap_data.mic2;
     // The entire 802.1x frame of the third handshake message with the MIC field set to all zeros
-    let data2 = hex::decode("020300af0213ca001000000000000000013e8e967dacd960324cac5b6aa721235bf57b949771c867989f49d04ed47c6933f57b949771c867989f49d04ed47c6934cf020000000000000000000000000000000000000000000000000000000000000050cfa72cde35b2c1e2319255806ab364179fd9673041b9a5939fa1a2010d2ac794e25168055f794ddc1fdfae3521f4446bfd11da98345f543df6ce199df8fe48f8cdd17adca87bf45711183c496d41aa0c")
+    let data2 = hex::decode(pcap_data.data2)
     .expect("Failed to decode Data2");
     // The third MIC
-    let mic3 = "10bba3bdfbcfde2bc537509d71f2ecd1";
+    let mic3 = &pcap_data.mic3;
     // The entire 802.1x frame of the forth handshake message with the MIC field set to all zeros
-    let data3 = hex::decode("0203005f02030a0010000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
-    .expect("Failed to decode Data2");
+    let data3 = hex::decode(pcap_data.data3)
+    .expect("Failed to decode Data3");
     // Run an offline dictionary attack against the access point
     test_pwds(passwordlist, ssid, &a_nonce, &s_nonce, &ap_mac, &cli_mac, &data1, &data2, &data3, mic1, mic2, mic3);
 }
-
+// Pseudo-random function for generation of
+// the pairwise transient key (PTK)
+// key:       The PMK
+// A:         b'Pairwise key expansion'
+// B:         The apMac, cliMac, aNonce, and sNonce concatenated
+//            like mac1 mac2 nonce1 nonce2
+//            such that mac1 < mac2 and nonce1 < nonce2
+// return:    The ptk
 fn prf(key: &[u8], a: &[u8], b: &[u8]) -> Vec<u8> {
     let n_byte = 64;
     let mut i = 0;
@@ -67,30 +80,6 @@ fn prf(key: &[u8], a: &[u8], b: &[u8]) -> Vec<u8> {
     r
 }
 
-// fn make_ab(a_nonce: &[u8], s_nonce: &[u8], ap_mac: &[u8], cli_mac: &[u8]) -> ([u8; 32], [u8; 32]) {
-//     let mut a = [0; 32];
-//     let mut b = [0; 32];
-
-//     let a_data = b"Pairwise key expansion";
-
-//     for i in 0..a_data.len() {
-//         a[i] = a_data[i];
-//     }
-
-//     let b_data = [
-//         &ap_mac[..6], &cli_mac[..6],
-//         &ap_mac[6..12], &cli_mac[6..12],
-//         &a_nonce, &s_nonce,
-//     ];
-
-//     for i in 0..b_data.len() {
-//         for j in 0..b_data[i].len() {
-//             b[i * 6 + j] = b_data[i][j];
-//         }
-//     }
-
-//     (a, b)
-// }
 fn min(a: &[u8], b: &[u8]) -> Vec<u8> {
     if a < b {
         a.to_vec()
@@ -106,6 +95,13 @@ fn max(a: &[u8], b: &[u8]) -> Vec<u8> {
         b.to_vec()
     }
 }
+// Make parameters for the generation of the PTK
+// aNonce:        The aNonce from the 4-way handshake
+// sNonce:        The sNonce from the 4-way handshake
+// apMac:         The MAC address of the access point
+// cliMac:        The MAC address of the client
+// return:        (A, B) where A and B are parameters
+// #               for the generation of the PTK
 fn make_ab(a_nonce: &[u8], s_nonce: &[u8], ap_mac: &[u8], cli_mac: &[u8]) -> ([u8; 22], Vec<u8>) {
     let a = *b"Pairwise key expansion";
     let b = [
@@ -117,7 +113,15 @@ fn make_ab(a_nonce: &[u8], s_nonce: &[u8], ap_mac: &[u8], cli_mac: &[u8]) -> ([u
     .concat();
     (a, b)
 }
-
+// Compute the 1st message integrity check for a WPA 4-way handshake
+// pwd:       The password to test
+// ssid:      The ssid of the AP
+// A:         b'Pairwise key expansion'
+// B:         The apMac, cliMac, aNonce, and sNonce concatenated
+//            like mac1 mac2 nonce1 nonce2
+//            such that mac1 < mac2 and nonce1 < nonce2
+// data:      A list of 802.1x frames with the MIC field zeroed
+// return:    (x, y, z) where x is the mic, y is the PTK, and z is the PMK
 fn make_mic(
     pwd: &str,
     ssid: &str,
@@ -157,6 +161,8 @@ fn make_mic(
     (mic, ptk, pmk)
 }
 
+// Run a brief test showing the computation of the PTK, PMK, and MICS
+// for a 4-way handshake
 fn test_pwds(
     passwordlist: Vec<String>,
     ssid: &str,
@@ -173,18 +179,22 @@ fn test_pwds(
 ) {
     // Pre-computed values
     let m = MultiProgress::new();
-    let bar_style = ProgressStyle::with_template("{wide_msg},")
+    let bar_style = ProgressStyle::with_template("
+    {wide_msg}")
     .unwrap();
     let (a, b) = make_ab(a_nonce, s_nonce, ap_mac, cli_mac);
     // let pb = ProgressBar::new(passwordlist.len() as u64);
     //create ProgressBar 
     let progressbar = m.add(ProgressBar::new(passwordlist.len() as u64));
-    progressbar.set_style(ProgressStyle::with_template("[{elapsed_precise}]")
+    progressbar.set_style(ProgressStyle::with_template("
+    [{elapsed_precise}]
+    {wide_msg}
+    ")
     .unwrap().progress_chars("=> "));
     //create Master Key Bar
     let master_keybar = m.add(ProgressBar::new(passwordlist.len() as u64));
     master_keybar.set_style(bar_style.clone());
-
+    //create Transient Key Bar
     let transient_keybar = m.add(ProgressBar::new(passwordlist.len() as u64));
     transient_keybar.set_style(bar_style.clone());
 
@@ -195,9 +205,9 @@ fn test_pwds(
         let (mic, ptk, pmk) = make_mic(password, ssid, &a, &b, data1, true);
         let v = hex::encode(&mic[..16]);
         progressbar.inc(1);
-        master_keybar.set_message(format!("Master Key   : {}",hex::encode(&pmk[..32])));
+        master_keybar.set_message(format!("Master Key    : {}",hex::encode(&pmk[..32])));
         transient_keybar.set_message(format!("Transient Key : {}",hex::encode(&ptk[..64])));
-        eapol_hmacbar.set_message(format!("EAPOL HMAC   : {v}"));
+        eapol_hmacbar.set_message(format!("EAPOL HMAC    : {v}"));
         if v != targ_mic {
             continue;
         }
@@ -215,12 +225,14 @@ fn test_pwds(
             continue;
         }
         thread::sleep(Duration::from_millis(12));
+        progressbar.set_message(format!("                 KEY FOUND [{}]",password.green()));
         progressbar.finish();
         master_keybar.finish();
         transient_keybar.finish();
         eapol_hmacbar.finish();
         return;
     }
+    progressbar.set_message(format!("                 {}","KEY NOT FOUND".red()));
     progressbar.finish();
     master_keybar.finish();
     transient_keybar.finish();
