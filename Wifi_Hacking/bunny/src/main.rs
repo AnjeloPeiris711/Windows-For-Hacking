@@ -18,8 +18,12 @@ use pnet::datalink;
 
 mod components {
     pub mod crack;
+    pub mod pcapformatter;
 }
 use components::crack::process_packets;
+// mod components {
+//     pub mod pcapformatter;
+// }
 const BUNNY_LOGO: &str = r#"
 
         (\_/)
@@ -40,14 +44,15 @@ fn main() {
         .arg(arg!(
             -m --monmood ... "Enable monitor mood"
         ).action(ArgAction::SetTrue))
-        .arg(arg!(
-            -c --crack ... "crack the password"
-        ).action(ArgAction::SetTrue))
+        // .arg(arg!(
+        //     -c --crack [FILE] "crack the password"
+        // ).action(ArgAction::SetTrue))
         .subcommand(
             Command::new("-C")
-                .long_about("--chek")
-                .about("Chek")
-                .arg(arg!(-d --debug ... "Identify Network interface").action(ArgAction::SetTrue)),
+                .long_about("--Crack")
+                .about("crack the password")
+                .arg(arg!(-w --words [FILE] "path to wordlist(s) filename(s)").action(ArgAction::Set).required(true).value_name("FILE"))
+                .arg(arg!(-p --pcap [FILE] "path to pcap(s) filename(s)").action(ArgAction::Set).required(true).value_name("FILE")),
         )
         .subcommand(
             Command::new("-I")
@@ -105,20 +110,26 @@ fn main() {
         println!("My number is not {}!", 4.on_red());
         // support_monitor_mood().unwrap()
     } 
-    if match_result.get_flag("crack"){
-        process_packets();
-        // support_monitor_mood().unwrap()
-    } 
+    // if match_result.get_flag("crack"){
+    //     process_packets();
+    //     // support_monitor_mood().unwrap()
+    // } 
     if match_result.get_flag("test"){
         println!("test")
     } 
     if let Some(match_result) = match_result.subcommand_matches("-C") {
         // "$ myapp test" was run
-        if match_result.get_flag("debug") {
-            // "$ myapp test -l" was run
-            println!("Printing testing lists...");
+        if let Some(wfile_path) = match_result.get_one::<String>("words") {
+            if let Some(pfile_path) = match_result.get_one::<String>("pcap"){
+                process_packets(wfile_path,pfile_path);
+            }
+            else{
+                println!("{}",BUNNY_LOGO);
+                println!("{}","You used the -p flag, but didn't provide a file path".red());
+            }
         } else {
-            println!("Not printing testing lists...");
+            println!("{}",BUNNY_LOGO);
+            println!("{}","You used the -w flag, but didn't provide a file path".red());
         }
     }
 
