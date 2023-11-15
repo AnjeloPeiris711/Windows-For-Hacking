@@ -1,0 +1,11 @@
+D:\youtube\Windows-For-Hacking\lsusb\target\debug\deps\term-9771c254c6df11f0.rmeta: C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\lib.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\mod.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\searcher.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\parser\compiled.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\parser\names.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\parm.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\win.rs
+
+D:\youtube\Windows-For-Hacking\lsusb\target\debug\deps\term-9771c254c6df11f0.d: C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\lib.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\mod.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\searcher.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\parser\compiled.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\parser\names.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\parm.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\win.rs
+
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\lib.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\mod.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\searcher.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\parser\compiled.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\parser\names.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\terminfo\parm.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\term-0.7.0\src\win.rs:
