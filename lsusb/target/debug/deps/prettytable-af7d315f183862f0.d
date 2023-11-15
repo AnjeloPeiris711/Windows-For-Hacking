@@ -1,0 +1,10 @@
+D:\youtube\Windows-For-Hacking\lsusb\target\debug\deps\prettytable-af7d315f183862f0.rmeta: C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\lib.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\cell.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\format.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\row.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\utils.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\csv.rs
+
+D:\youtube\Windows-For-Hacking\lsusb\target\debug\deps\prettytable-af7d315f183862f0.d: C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\lib.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\cell.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\format.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\row.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\utils.rs C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\csv.rs
+
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\lib.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\cell.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\format.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\row.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\utils.rs:
+C:\Users\asus\.cargo\registry\src\index.crates.io-6f17d22bba15001f\prettytable-rs-0.10.0\src\csv.rs:
