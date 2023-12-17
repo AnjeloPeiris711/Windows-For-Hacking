@@ -1,0 +1,167 @@
+use pcap::*;
+
+
+pub fn packet_dump() {
+    let device = Device::list().unwrap()[4].clone();
+    println!("{:?}",device);
+    let mut cap = device.open().unwrap();
+
+    // Create a new Savefile and open it for writing
+    // Setup Capture
+    let mut savefile = cap.savefile("test.pcap").unwrap();
+    // get a packet from the interface
+    // Set a filter to capture only TCP packets
+    cap.filter("tcp", true).unwrap();
+    let p = cap.next_packet().unwrap();
+
+    // print the packet out
+    println!("packet received on network: {:?}", p);
+
+    // write the packet to the savefile
+    savefile.write(&p);
+
+}
+extern crate winapi;
+
+
+use std::ptr;
+use winapi::shared::ntdef::NULL;
+use winapi::um::wlanapi::*;
+use winapi::um::winnt::HANDLE;
+use winapi::um::wlanapi::WLAN_API_VERSION_2_0;
+use winapi::shared::winerror::ERROR_SUCCESS;
+
+pub fn packet_dump() {
+    // capture_wpa2_handshake();
+    unsafe {
+        let mut client_handle: HANDLE = ptr::null_mut();
+        let mut version=WLAN_API_VERSION_2_0; // Use WLAN API version 2
+
+        let result = WlanOpenHandle(
+            WLAN_API_VERSION_2_0,
+            NULL,
+            &mut version as *mut _ as *mut _,
+            &mut client_handle,
+            
+        );
+
+        if result == ERROR_SUCCESS {
+            let mut interface_list: *mut WLAN_INTERFACE_INFO_LIST = ptr::null_mut();
+            let result = WlanEnumInterfaces(
+                client_handle,
+                ptr::null_mut(),
+                &mut interface_list,
+            );
+
+            if result == ERROR_SUCCESS {
+                let interface_count = (*interface_list).dwNumberOfItems as usize;
+                let interface_info_count = (*interface_list).InterfaceInfo.len();
+
+                println!("dwNumberOfItems: {}", interface_count);
+                println!("InterfaceInfo length: {}", interface_info_count);
+                for i in 0..interface_info_count {
+                    
+                    let interface_info = &(*interface_list).InterfaceInfo[i];
+                    let description = String::from_utf16_lossy(&interface_info.strInterfaceDescription);
+                    println!("Interface {}: {}", i, description);
+                    println!("InterfaceGUID: {:x}-{:x}-{:x}-{:x?}", interface_info.InterfaceGuid.Data1, interface_info.InterfaceGuid.Data2, interface_info.InterfaceGuid.Data3, interface_info.InterfaceGuid.Data4);
+                    println!("IsState: {}", interface_info.isState);
+                    // println!("PhyType: {:?}", interface_info.dot11PhyType);
+                    // println!("InterfaceMode: {:?}", interface_info.dot11BssType);
+                    println!("");  
+                    
+                }
+
+                WlanFreeMemory(interface_list as *mut _);
+            } else {
+                println!("Failed to enumerate interfaces: {}", result);
+            }
+
+            WlanCloseHandle(client_handle, ptr::null_mut());
+        } else {
+            println!("Failed to open WLAN handle: {}", result);
+        }
+    }
+}
+
+extern crate winapi;
+
+use std::ptr;
+use winapi::um::wlanapi::{
+    WlanOpenHandle, WlanCloseHandle, WlanEnumInterfaces, WlanGetInterfaceCapability,
+    WLAN_INTERFACE_INFO_LIST, WLAN_INTERFACE_CAPABILITY,
+};
+use winapi::shared::winerror;
+use winapi::shared::ntdef::HANDLE;
+pub fn packet_dump() {
+    // capture_wpa2_handshake();
+    unsafe {
+        let mut h_client: HANDLE = ptr::null_mut();
+        let mut dw_cur_version: winapi::shared::minwindef::DWORD = 0;
+        // let mut dw_result: winapi::shared::minwindef::DWORD = 0;
+
+        // Open a handle to the WLAN interface
+        // dw_result = WlanOpenHandle(2, ptr::null_mut(), &mut dw_cur_version, &mut h_client);
+        if WlanOpenHandle(2, ptr::null_mut(), &mut dw_cur_version, &mut h_client)
+    != winerror::ERROR_SUCCESS
+{
+    eprintln!("WlanOpenHandle failed");
+    return;
+}
+
+        // Enumerate available WLAN interfaces
+        let mut p_interface_list: *mut WLAN_INTERFACE_INFO_LIST = ptr::null_mut();
+        if WlanEnumInterfaces(h_client, ptr::null_mut(), &mut p_interface_list)
+            != winerror::ERROR_SUCCESS
+        {
+            eprintln!("WlanEnumInterfaces failed");
+            WlanCloseHandle(h_client, ptr::null_mut());
+            return;
+        }
+
+        // Iterate through each interface and display capabilities
+        for i in 0..(*p_interface_list).dwNumberOfItems as usize{
+            let mut p_cap: *mut WLAN_INTERFACE_CAPABILITY = ptr::null_mut();
+            let dw_result = WlanGetInterfaceCapability(
+                h_client,
+                &(*p_interface_list).InterfaceInfo[i].InterfaceGuid,
+                ptr::null_mut(),
+                &mut p_cap,
+            );
+            if dw_result == winerror::ERROR_SUCCESS {
+                // Display capabilities
+                println!("Interface {} capabilities:", i + 1);
+                println!("  Interface Type: {}", (*p_cap).interfaceType);
+                println!(
+                    "  802.11d Supported: {}",
+                    if (*p_cap).bDot11DSupported != 0 {
+                        "Yes"
+                    } else {
+                        "No"
+                    }
+                );
+                println!("  Max SSID List Size: {}", (*p_cap).dwMaxDesiredSsidListSize);
+                println!("  Max BSSID List Size: {}", (*p_cap).dwMaxDesiredBssidListSize);
+                println!("  Number of Supported PHYs: {}", (*p_cap).dwNumberOfSupportedPhys);
+
+                // Display supported PHY types
+                print!("  Supported PHY Types:");
+                for j in 0..(*p_cap).dwNumberOfSupportedPhys as usize {
+                    print!(" {}", (*p_cap).dot11PhyTypes[j]);
+                }
+                println!();
+
+                // Clean up memory
+                winapi::um::wlanapi::WlanFreeMemory(p_cap as *mut std::ffi::c_void);
+            } else {
+                eprintln!("WlanGetInterfaceCapability failed with error code {}", dw_result);
+            }
+        }
+
+        // Clean up
+        if !p_interface_list.is_null() {
+            winapi::um::wlanapi::WlanFreeMemory(p_interface_list as *mut std::ffi::c_void);
+        }
+        WlanCloseHandle(h_client, ptr::null_mut());
+    }
+}
