@@ -3,9 +3,14 @@ extern crate winapi;
 use std::ptr;
 use winapi::shared::ntdef::NULL;
 use winapi::um::wlanapi::*;
-use winapi::um::winnt::HANDLE;
+use winapi::um::winnt::{HANDLE,PVOID};
 use winapi::um::wlanapi::WLAN_API_VERSION_2_0;
 use winapi::shared::winerror::ERROR_SUCCESS;
+use winapi::shared::windot11::{
+    DOT11_OPERATION_MODE_EXTENSIBLE_STATION,
+    DOT11_OPERATION_MODE_NETWORK_MONITOR,
+    DOT11_OPERATION_MODE_EXTENSIBLE_AP
+};
 // extern crate pnet;
 #[macro_use] extern crate prettytable;
 
@@ -21,20 +26,15 @@ extern crate pcap;
 
 
 
-
-
-// use pnet::datalink::{self, NetworkInterface,MacAddr};
-// use pnet::datalink;
-
 mod components {
     pub mod crack;
     pub mod pcapformatter;
     pub mod dump;
-    // pub mod monitormood;
+    pub mod monitormood;
 }
 use components::crack::process_packets;
 use components::dump::packet_dump;
-// use components::monitormood::monitor_intrface;
+use components::monitormood::monitor_interface;
 // mod components {
 //     pub mod pcapformatter;
 // }
@@ -75,6 +75,13 @@ fn main() {
                 .arg(arg!(-i --interface [int_name] "Select Inteface to dump the packets").action(ArgAction::Set).required(true).value_name("int_name"))
                 .arg(arg!(-f --file [FILE] "path to pcap(s) filename(s)").action(ArgAction::Set).required(true).value_name("FILE")),
         )
+        .subcommand(
+            Command::new("-M")
+                .long_about("--Mode")
+                .about("Change the interface Mode")
+                .arg(arg!(-i --interface [int_id] "Select Inteface to Change Mode").action(ArgAction::Set).required(true).value_name("int_id"))
+                .arg(arg!(-m --mode [mode_name] "Select Witch Mode you Nead(😈 NetMon | 😇 ExtSTA | 😏 ExtAP) ").action(ArgAction::Set).required(true).value_name("mode_name")),
+        )
         .get_matches();
     let mut table = Table::new();
     let format = format::FormatBuilder::new()
@@ -84,6 +91,7 @@ fn main() {
 
     table.add_row(row![
         "Inter_ID".green(),
+        " Inter_Mode".green(),
         "      Inter_Name".green(),
         "          Inter_GUID".green(),
         "  Monitor_Mood".green()
@@ -107,8 +115,10 @@ fn main() {
     
             if result == ERROR_SUCCESS {
                 let mut interface_list: *mut WLAN_INTERFACE_INFO_LIST = ptr::null_mut();
-                // Iterate through each interface and display capabilities
-                //let mut p_cap: *mut WLAN_INTERFACE_CAPABILITY = ptr::null_mut();
+                let mut opcode_result: WLAN_OPCODE_VALUE_TYPE = std::mem::zeroed();
+                let mut data_size: u32 = 0;
+                let mut data: PVOID = ptr::null_mut();
+                let reserved: PVOID = ptr::null_mut();
                 let result = WlanEnumInterfaces(
                     client_handle,
                     ptr::null_mut(),
@@ -122,16 +132,38 @@ fn main() {
     
                     for (i, interface_info) in interface_info_slice.iter().enumerate() {
                         let description = String::from_utf16_lossy(&interface_info.strInterfaceDescription);
-                        table.add_row(Row::new(vec![
-                            Cell::new(&format!("{:>3}", i + 1)),
-                            // Cell::new(&format!(" {}",&interface.description)),
-                            Cell::new(&format!(" {}",&description)),
-                            Cell::new(&format!(" {:x}-{:x}-{:x}-{:x?}",&interface_info.InterfaceGuid.Data1, interface_info.InterfaceGuid.Data2, interface_info.InterfaceGuid.Data3, interface_info.InterfaceGuid.Data4)),
-                            Cell::new(&format!(" {}",&monresults[i]))
-                        ]));
+                        let dw_result = WlanQueryInterface(
+                            client_handle,
+                            &interface_info.InterfaceGuid,
+                            wlan_intf_opcode_current_operation_mode,
+                            reserved,
+                            &mut data_size,
+                            &mut data,
+                            &mut opcode_result as *mut _,
+                            
+                            
+                        );
+                        if dw_result == ERROR_SUCCESS {
+                            let mode =  *(data as *const WLAN_OPCODE_VALUE_TYPE) ;
+                            let modediscription = match mode {
+                                DOT11_OPERATION_MODE_EXTENSIBLE_STATION=>"😇 ExtSTA".yellow(),
+                                DOT11_OPERATION_MODE_NETWORK_MONITOR=>"😈 NetMon".yellow(),
+                                DOT11_OPERATION_MODE_EXTENSIBLE_AP=>"😏 ExtAP".yellow(),
+                                _ => "🥴 Unknown".yellow(),
+                            };
+                            table.add_row(Row::new(vec![
+                                Cell::new(&format!("{:>3}", i)),
+                                Cell::new(&format!(" {}",&modediscription)),
+                                Cell::new(&format!(" {}",&description)),
+                                Cell::new(&format!(" {:x}-{:x}-{:x}-{:x?}",&interface_info.InterfaceGuid.Data1, interface_info.InterfaceGuid.Data2, interface_info.InterfaceGuid.Data3, interface_info.InterfaceGuid.Data4)),
+                                Cell::new(&format!(" {}",&monresults[i]))
+                            ]));
+                        }else{
+                            println!("Failed to open WLAN handle: {}", result);
+                        }
                     }
     
-                    WlanFreeMemory(interface_list as *mut _);
+                    WlanFreeMemory(interface_list as *mut std::ffi::c_void);
                     //WlanFreeMemory(p_cap as *mut std::ffi::c_void);
                 } else {
                     println!("Failed to enumerate interfaces: {}", result);
@@ -148,7 +180,8 @@ fn main() {
     }
         // Access other properties of the interface here.
     if match_result.get_flag("monmood"){
-        println!("nathing")
+        panic!("fjdkdjkdj")
+    
         // match monitor_interface("eth0") {
         //     Ok(()) => println!("Interface monitoring successful."),
         //     Err(err) => eprintln!("Error: {}", err),
@@ -195,6 +228,22 @@ fn main() {
         } else {
             println!("Dump");
             
+        }
+    }
+    if let Some(match_result) = match_result.subcommand_matches("-M") {
+        if let Some(interface_str) = match_result.get_one::<String>("interface") {
+            if let Ok(int_id) = interface_str.parse::<usize>() {
+                if let Some(mode_name) = match_result.get_one::<String>("mode") {
+                    monitor_interface(int_id, mode_name);
+                }
+                else{
+                    println!("{}","You used the -i flag, but didn't provide a interface Id".red());
+                }
+            }else{
+                println!("{}","Error: Couldn't parse interface to usize".red());
+            }
+        } else {
+            println!("{}","You used the -m flag, but didn't provide a witch mode you want".red());
         }
     }
     // Continued program logic goes here...
