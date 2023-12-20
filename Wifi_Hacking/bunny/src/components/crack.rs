@@ -26,7 +26,8 @@ pub fn process_packets(
         .map(String::from)
         .collect();
     //SSID name
-    let ssid = "Coherer";
+    //let ssid = "Coherer";
+    let ssid = "HACK2.4G";
     // ANonce
     let a_nonce = hex::decode(pcap_data.a_nonce).expect("Failed to decode ANonce");
     // SNonce
