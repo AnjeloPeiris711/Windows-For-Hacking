@@ -92,4 +92,43 @@ Execute the command `.\bunny.exe -n`, and you will observe an output similar to 
 ```bash
 Npcap version: Npcap version 1.78, based on libpcap version 1.10.4
 ```
+### Command Line Options:
+``` bash
+-C, --crack
+Crack the Password:
+   Initiates the password cracking process.
 
+-D, --Dump
+Dump Packets:
+   Captures and Save network packets for analysis.
+
+-M, --mode
+Change the Interface Mode:
+   Allows dynamic switching of the network interface mode.
+
+-help
+Print this Message or the Help of the Given Subcommand(s):
+   Displays the general help message or specific help for provided subcommands.
+
+> Options:
+
+-i, --interface
+Identify Network Interface:
+   Provides information about the available network interfaces.
+
+-n, --npcap
+Check if Npcap is Installed:
+   Verifies the presence of the Npcap software.
+
+-d, --dump
+Dump the Packets:
+   Display packet details.
+
+-h, --help
+Print Help:
+   Displays information about the usage and options.
+
+-V, --version
+Print Version:
+   Outputs the version information of the application.
+```
