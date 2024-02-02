@@ -165,3 +165,114 @@ pub fn packet_dump() {
         WlanCloseHandle(h_client, ptr::null_mut());
     }
 }
+94196f19-1732-4fc9-b52f-b585c91d190e
+94196F19-1732-4FC9-B52F-B585C91D190E
+
+extern crate pcap;
+use pcap::*;
+fn capture_wpa2_handshake(
+    interface_index:usize
+) {
+    // List available devices and choose the one you want
+    let device = Device::list().unwrap()[interface_index].clone();
+    // Choose the device (you may need to change the index based on your setup)
+
+
+    // Open the selected device for capturing
+    let mut cap = device.open().unwrap();
+    let mut savefile = cap.savefile("test.pcap").unwrap();
+    // Keep capturing until the 4-way handshake is complete
+    let mut handshake_complete = false;
+    // Set a filter to capture only TCP packets
+    // cap.filter("ether proto 0x888e", true).unwrap();
+    // cap.filter("type mgt", true).unwrap();
+    while !handshake_complete {
+        if let Ok(packet) = cap.next_packet() {
+            // Process the packet, check if it's part of the WPA2 4-way handshake
+            // You need to implement the logic to identify EAPOL-Key messages
+            // and keep track of the handshake state
+            println!("Received packet: {:?}", packet);
+
+            // Check if the WPA2 4-way handshake is complete
+            // You need to implement the logic to detect the completion of the handshake
+        handshake_complete = is_wpa2_handshake_complete(&packet);
+        // handshake_complete = true;
+        savefile.write(&packet);
+        }
+
+    }
+    println!("WPA2 4-way handshake complete!");
+}
+
+fn is_wpa2_handshake_complete(packet: &Packet) -> bool {
+    println!("{:?}",packet);
+    // Implement the logic to check if the packet is part of the WPA2 4-way handshake
+    // You need to examine the packet content and EAPOL-Key messages
+    // Return true if the handshake is complete, otherwise false
+    // unimplemented!("Implement the logic to check if the WPA2 handshake is complete");
+    true
+}
+// fn interface_setup(){
+//     let devices = Device::list().unwrap(); 
+//     // for device in devices {
+//     //     println!("{:?}", device.name);
+//     // }
+//     for (index, _) in devices.iter().enumerate().filter(|(_, device)| device.name.to_lowercase() == "\\device\\npf_{7F1BAA04-D943-494B-880A-843846E27F16}") {
+//         println!("{:?}",index);
+//         capture_wpa2_handshake(index);
+//         break;  // This will exit the for loop when the device is found
+//     }
+        
+// }
+fn interface_setup() {
+    let target_device_name = "\\device\\npf_{7F1BAA04-D943-494B-880A-843846E27F16}".to_lowercase();
+    
+    match Device::list() {
+        Ok(devices) => {
+            if let Some((index, _)) = devices
+                .iter()
+                .enumerate()
+                .find(|(_, device)| device.name.to_lowercase() == target_device_name)
+            {
+                println!("Device found at index: {}", index);
+                for device in devices {
+                    println!("{:?}", device.desc);
+                }
+                capture_wpa2_handshake(index);
+            } else {
+                println!("Device not found");
+            }
+        }
+        Err(err) => {
+            eprintln!("Error listing devices: {}", err);
+        }
+    }
+}
+
+
+pub fn packet_dump(){
+    interface_setup()
+}
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+

@@ -31,10 +31,14 @@ mod components {
     pub mod pcapformatter;
     pub mod dump;
     pub mod monitormood;
+    pub mod scan;
 }
 use components::crack::process_packets;
 use components::dump::packet_dump;
 use components::monitormood::monitor_interface;
+use components::scan::scan_network;
+
+use crate::components::dump::packet_dump_save;
 // mod components {
 //     pub mod pcapformatter;
 // }
@@ -180,7 +184,7 @@ fn main() {
     }
         // Access other properties of the interface here.
     if match_result.get_flag("monmood"){
-        panic!("fjdkdjkdj")
+        scan_network();
     
         // match monitor_interface("eth0") {
         //     Ok(()) => println!("Interface monitoring successful."),
@@ -216,10 +220,10 @@ fn main() {
         }
     }
     if let Some(match_result) = match_result.subcommand_matches("-D"){
-        println!("test");
         if let Some(int_name) = match_result.get_one::<String>("interface") {
             if let Some(file_path) = match_result.get_one::<String>("file"){
-               println!("{},{}",int_name,file_path)
+               println!("{},{}",int_name,file_path);
+               packet_dump_save();
             }
             else{
                 println!("one");
