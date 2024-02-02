@@ -14,7 +14,7 @@ $${\color{red}For \space Only \space Educational \space purposes }$$
 - [Contributing](#contributing)
 - [License](#license)
 
-<a name="installation"></a>
+
 ## Installation
 > Bunny 0.1.0 Installation Guide
 
@@ -62,6 +62,8 @@ Finally, click on `Finish` to complete the installation process.
 
 Once the installation is complete, open a `PowerShell ` using `Administrator Privileges` and navigate to the extracted directory run the following command to verify that `bunny, npcap ` are working correctly:
 
+
+## Usage
 ```bash
 🐰\your_directory>.\bunny.exe -h
 
