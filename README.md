@@ -12,7 +12,7 @@
 
 Project:- https://github.com/AnjeloPeiris711/Windows-For-Hacking/tree/main/Wifi_Hacking/bunny
 Demo :- https://www.youtube.com/watch?v=TJDcy3PpD1g
-
+Lsusb :- https://www.youtube.com/watch?v=GnmjhyQfYw0
 ### Network scan
 for ($i = 1; $i -le 254; $i++) {
   Test-Connection -ComputerName "192.168.1.$i" -Count 1 -ErrorAction SilentlyContinue | Where-Object { $_.StatusCode -eq 0 }
